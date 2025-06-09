@@ -39,9 +39,59 @@
                 <button id="stop">Stop</button>
                 <button id="changeParams">Back</button>
                 <div id="info"></div>
+
+                <button id="dlMask">Download Mask</button>
+                <input type="file" accept="image/*" id="loadMaskInput"/>
+                <label for="loadMaskInput">Upload Mask</label>
             </div>
         </div>
+       <script>
+    document.getElementById('dlMask').addEventListener('click', function(){
+        var canvas = document.getElementById('maze');
+        
+        // Получаем данные с canvas в виде base64 строки
+        var imageDataUrl = canvas.toDataURL('image/png'); 
+        
+        // Создаем временную ссылку для скачивания файла
+        var link = document.createElement('a');
+        link.href = imageDataUrl;
+        link.download = 'mask.png'; // Имя файла
+        link.click(); // Имитация клика на ссылку
+    });
 
+    // Добавляем обработчик для загрузки файла
+    document.getElementById('loadMaskInput').addEventListener('change', loadMask);
+    
+    function loadMask(event){
+        let file = event.target.files[0]; // Получаем выбранный файл
+        
+        if (!file || !file.type.startsWith('image')) {
+            alert('Выберите изображение!');
+            return;
+        }
+        
+        let reader = new FileReader();
+        
+        // Читаем файл как data URL
+        reader.onload = function(e) {
+            let img = new Image();
+            
+            // После загрузки изображения прорисовываем его на canvas
+            img.onload = function() {
+                let canvas = document.getElementById('maze');
+                let ctx = canvas.getContext('2d');
+                
+                // Центрирование изображения на canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Очищаем canvas
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Рисуем загруженное изображение
+            };
+            
+            img.src = e.target.result; // Устанавливаем src изображения равным полученной строке data URL
+        };
+        
+        reader.readAsDataURL(file); // Начинаем чтение файла
+    }
+</script>
         <script src="js/config.js" type="module"></script>
         <script src="js/stateMachine.js" type="module"></script>
         <script src="js/model.js" type="module"></script>
